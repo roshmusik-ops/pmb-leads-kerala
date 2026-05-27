@@ -113,6 +113,6 @@ st.markdown("""
 <div style='text-align:center;font-size:0.85rem;color:#64748b'>
   PMB Jan Aushadhi Kendra, Pound Velupadam, Thrissur<br>
   <a href='tel:+917356985202'>+91 73569 85202</a> &nbsp;·&nbsp;
-  <a href='mailto:janaushadhipound8873@gmail.com'>janaushadhipound8873@gmail.com</a>
+  <a href='mailto:pmbjanaushadhi680006@gmail.com'>pmbjanaushadhi680006@gmail.com</a>
 </div>
 """, unsafe_allow_html=True)

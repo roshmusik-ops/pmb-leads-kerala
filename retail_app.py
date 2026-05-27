@@ -221,7 +221,7 @@ with tab_email:
         st.success(f"Gmail: **{gmail_user}**")
     except Exception:
         st.info("Add Gmail credentials to Streamlit secrets.")
-        gmail_user = st.text_input("Gmail", value="janaushadhipound8873@gmail.com")
+        gmail_user = st.text_input("Gmail", value="pmbjanaushadhi680006@gmail.com")
         gmail_pass = st.text_input("App Password", type="password")
         from_name  = st.text_input("Sender name", value="PMB Jan Aushadhi Kendra, Velupadam")
 
@@ -251,7 +251,7 @@ We would like to partner with {name}{(', ' + district) if district else ''} to:
 - Help your patients save on long-term medicines (diabetes, BP, thyroid, etc.)
 
 Contact: +91 73569 85202
-Email: janaushadhipound8873@gmail.com
+Email: pmbjanaushadhi680006@gmail.com
 
 Warm regards,
 {from_name}"""

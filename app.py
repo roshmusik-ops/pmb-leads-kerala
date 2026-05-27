@@ -275,7 +275,7 @@ with tab_email:
         st.success(f"Using Gmail: **{gmail_user}**")
     except Exception:
         st.info("Enter Gmail credentials below (add to Streamlit secrets for permanent setup).")
-        gmail_user = st.text_input("Gmail address", value="janaushadhipound8873@gmail.com")
+        gmail_user = st.text_input("Gmail address", value="pmbjanaushadhi680006@gmail.com")
         gmail_pass = st.text_input("Gmail App Password", type="password",
                                    help="Generate at myaccount.google.com/apppasswords")
         from_name  = st.text_input("Sender name", value="PMB Jan Aushadhi Kendra, Velupadam")
@@ -316,7 +316,7 @@ We would appreciate the opportunity to connect and discuss how we can support yo
 Warm regards,
 {from_name}
 Phone: +91 73569 85202
-Email: janaushadhipound8873@gmail.com
+Email: pmbjanaushadhi680006@gmail.com
 """
         return subject, body
 
