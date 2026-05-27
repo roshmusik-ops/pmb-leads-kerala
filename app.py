@@ -20,8 +20,7 @@ from urllib.parse import quote
 import pandas as pd
 import streamlit as st
 
-CSV_GOVT   = Path(__file__).with_name("leads_kerala_health.csv")
-CSV_PRIVATE = Path(__file__).with_name("leads_private_doctors.csv")
+CSV_PATH = Path(__file__).with_name("leads_kerala_health.csv")
 SENT_LOG = Path(__file__).with_name("sent_log.csv")
 SCRIPT_DIR = Path(__file__).parent
 
@@ -57,13 +56,6 @@ def load_data(path: Path, _mtime: float) -> pd.DataFrame:
     return df
 
 
-@st.cache_data(show_spinner=False)
-def load_all_data():
-    govt    = load_data(CSV_GOVT,    CSV_GOVT.stat().st_mtime    if CSV_GOVT.exists()    else 0)
-    private = load_data(CSV_PRIVATE, CSV_PRIVATE.stat().st_mtime if CSV_PRIVATE.exists() else 0)
-    if not govt.empty:    govt["dataset"]    = "Govt Health Centre"
-    if not private.empty: private["dataset"] = "Private Doctor/Clinic"
-    return pd.concat([govt, private], ignore_index=True) if not govt.empty or not private.empty else pd.DataFrame()
 
 
 def whatsapp_url(phone: str, name: str) -> str:
@@ -88,20 +80,21 @@ def maps_url(lat, lon, name) -> str:
 
 
 # ---------- header ----------
-st.title("🏥 Kerala Govt Health Centres — Lead Finder")
+st.title("🏥 Kerala Govt Health Centres")
 st.caption("Built for **PMB Jan Aushadhi Kendra, Pound Velupadam, Thrissur** · "
            "No.1 Govt Health Centre Dealer in Kerala")
 
-df = load_all_data()
-if df.empty:
+if not CSV_PATH.exists():
     st.warning("No leads CSV found yet.")
     if st.button("Run scraper now"):
-        with st.spinner("Pulling Kerala health facilities..."):
+        with st.spinner("Pulling Kerala govt health facilities..."):
             r = subprocess.run([sys.executable, "find_health_centres.py"],
                                cwd=SCRIPT_DIR, capture_output=True, text=True, timeout=600)
             st.code(r.stdout)
         st.rerun()
     st.stop()
+
+df = load_data(CSV_PATH, CSV_PATH.stat().st_mtime)
 
 # ---------- sidebar filters ----------
 st.sidebar.header("🔎 Filters")
@@ -141,13 +134,6 @@ else:
 sel_types = st.sidebar.multiselect("Facility type", types, default=default_types)
 
 st.sidebar.markdown("---")
-if "dataset" in df.columns:
-    ds_opts = sorted(df["dataset"].dropna().unique().tolist())
-    sel_datasets = st.sidebar.multiselect("Lead type", ds_opts, default=ds_opts)
-else:
-    sel_datasets = []
-
-st.sidebar.markdown("---")
 only_phone = st.sidebar.checkbox("Has phone number", value=False)
 only_email = st.sidebar.checkbox("Has email", value=False)
 only_website = st.sidebar.checkbox("Has website", value=False)
@@ -173,8 +159,6 @@ if st.sidebar.button("📍 Re-fill districts"):
 
 # ---------- apply filters ----------
 fdf = df.copy()
-if sel_datasets and "dataset" in fdf.columns:
-    fdf = fdf[fdf["dataset"].isin(sel_datasets)]
 if sel_districts:
     fdf = fdf[fdf["district"].isin(sel_districts)]
 if sel_types:
@@ -410,4 +394,5 @@ Email: janaushadhipound8873@gmail.com
 
 st.markdown("---")
 st.caption(f"Data source: OpenStreetMap · Last updated: "
-           f"{pd.Timestamp(CSV_PATH.stat().st_mtime, unit='s').strftime('%d %b %Y %H:%M')}")
+           f"{pd.Timestamp(CSV_PATH.stat().st_mtime, unit='s').strftime('%d %b %Y %H:%M')} · "
+           "[Retail Finder →](retail_app)")
