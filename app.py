@@ -309,13 +309,13 @@ Key highlights:
 - All medicines approved under Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)
 - Direct supply to PHCs, CHCs, Taluk & District Hospitals
 - Competitive rates, reliable stock, timely delivery
-- Contact: +91 73569 85202
+- Contact: +91 94473 36560
 
 We would appreciate the opportunity to connect and discuss how we can support your facility's medicine requirements.
 
 Warm regards,
 {from_name}
-Phone: +91 73569 85202
+Phone: +91 94473 36560
 Email: pmbjanaushadhi680006@gmail.com
 """
         return subject, body

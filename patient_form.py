@@ -78,7 +78,7 @@ st.markdown("""
 <div style='text-align:center;padding:1rem 0'>
   <div style='font-size:3rem'>💊</div>
   <h1 style='margin:0.3rem 0'>PMB Jan Aushadhi Chelakottukara</h1>
-  <p style='color:#64748b;margin:0'>Chelakottukara, Thrissur &nbsp;·&nbsp; +91 73569 85202</p>
+  <p style='color:#64748b;margin:0'>Chelakottukara, Thrissur &nbsp;·&nbsp; +91 94473 36560</p>
   <div style='background:#f0fdf4;border:1px solid #86efac;border-radius:12px;padding:0.7rem;margin-top:1rem'>
     <b style='color:#15803d'>Save 50–90%</b> on your medicines with government-approved generics
   </div>
@@ -106,13 +106,13 @@ if submitted:
         })
         st.balloons()
         st.success(f"✅ Thank you, {name.split()[0]}! We'll WhatsApp you shortly.")
-        st.info("📞 Call us: **+91 73569 85202**")
+        st.info("📞 Call us: **+91 94473 36560**")
 
 st.markdown("---")
 st.markdown("""
 <div style='text-align:center;font-size:0.85rem;color:#64748b'>
   PMB Jan Aushadhi Chelakottukara, Chelakottukara, Thrissur<br>
-  <a href='tel:+917356985202'>+91 73569 85202</a> &nbsp;·&nbsp;
+  <a href='tel:+919447336560'>+91 94473 36560</a> &nbsp;·&nbsp;
   <a href='mailto:pmbjanaushadhi680006@gmail.com'>pmbjanaushadhi680006@gmail.com</a>
 </div>
 """, unsafe_allow_html=True)

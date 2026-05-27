@@ -250,7 +250,7 @@ We would like to partner with {name}{(', ' + district) if district else ''} to:
 - Provide quick delivery and reliable stock
 - Help your patients save on long-term medicines (diabetes, BP, thyroid, etc.)
 
-Contact: +91 73569 85202
+Contact: +91 94473 36560
 Email: pmbjanaushadhi680006@gmail.com
 
 Warm regards,
