@@ -301,7 +301,7 @@ with tab_email:
         subject = f"Generic Medicines Supply — PMB Jan Aushadhi Kendra, Thrissur"
         body = f"""Dear Medical Officer / Store In-charge,
 
-Greetings from **PMB Jan Aushadhi Kendra**, Pound Velupadam, Thrissur — Kerala's leading supplier of government-approved generic medicines.
+Greetings from **PMB Jan Aushadhi Kendra**, Chelakottukara, Thrissur — Kerala's leading supplier of government-approved generic medicines.
 
 We supply 2,000+ PMBJP generic medicines at **50–90% lower prices** than branded alternatives, directly beneficial for patients at {name}{(', ' + district) if district else ''}.
 
