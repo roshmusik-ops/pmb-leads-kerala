@@ -1,0 +1,6 @@
+.streamlit/secrets.toml
+sent_log.csv
+.nominatim_cache.json
+.kerala_districts.geojson
+__pycache__/
+*.pyc

@@ -6,9 +6,14 @@ Run:
     streamlit run app.py
 """
 from __future__ import annotations
+import csv
 import io
+import smtplib
 import subprocess
 import sys
+from datetime import datetime
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 from pathlib import Path
 from urllib.parse import quote
 
@@ -16,6 +21,7 @@ import pandas as pd
 import streamlit as st
 
 CSV_PATH = Path(__file__).with_name("leads_kerala_health.csv")
+SENT_LOG = Path(__file__).with_name("sent_log.csv")
 SCRIPT_DIR = Path(__file__).parent
 
 st.set_page_config(
@@ -182,8 +188,8 @@ c5.metric("Types", fdf["type"].nunique())
 st.markdown("---")
 
 # ---------- tabs ----------
-tab_table, tab_map, tab_breakdown, tab_call = st.tabs(
-    ["📋 Table", "🗺️ Map", "📊 Breakdown", "📞 Call list"]
+tab_table, tab_map, tab_breakdown, tab_call, tab_email = st.tabs(
+    ["📋 Table", "🗺️ Map", "📊 Breakdown", "📞 Call list", "✉️ Email"]
 )
 
 # ===== Table tab =====
@@ -256,6 +262,135 @@ with tab_call:
                 cols[3].link_button("📍 Maps", maps_url(r.get("lat"), r.get("lon"), r["name"]))
         if len(fdf[fdf["has_phone"]]) > 200:
             st.caption(f"Showing first 200 of {int(fdf['has_phone'].sum())} — narrow filters to see more.")
+
+# ===== Email tab =====
+with tab_email:
+    st.subheader("✉️ Send outreach emails")
+
+    # Gmail credentials from Streamlit secrets or manual input
+    try:
+        gmail_user = st.secrets["GMAIL_USER"]
+        gmail_pass = st.secrets["GMAIL_APP_PASSWORD"]
+        from_name  = st.secrets.get("FROM_NAME", "PMB Jan Aushadhi Kendra")
+        st.success(f"Using Gmail: **{gmail_user}**")
+    except Exception:
+        st.info("Enter Gmail credentials below (add to Streamlit secrets for permanent setup).")
+        gmail_user = st.text_input("Gmail address", value="janaushadhipound8873@gmail.com")
+        gmail_pass = st.text_input("Gmail App Password", type="password",
+                                   help="Generate at myaccount.google.com/apppasswords")
+        from_name  = st.text_input("Sender name", value="PMB Jan Aushadhi Kendra, Velupadam")
+
+    # Load sent log
+    def load_sent() -> set:
+        if not SENT_LOG.exists():
+            return set()
+        try:
+            return {r["email"] for r in csv.DictReader(open(SENT_LOG, encoding="utf-8"))}
+        except Exception:
+            return set()
+
+    def log_sent(email: str, name: str):
+        exists = SENT_LOG.exists()
+        with open(SENT_LOG, "a", encoding="utf-8", newline="") as f:
+            w = csv.writer(f)
+            if not exists:
+                w.writerow(["email", "name", "sent_at"])
+            w.writerow([email, name, datetime.now().strftime("%Y-%m-%d %H:%M")])
+
+    def build_email(name: str, district: str, ftype: str) -> tuple[str, str]:
+        subject = f"Generic Medicines Supply — PMB Jan Aushadhi Kendra, Thrissur"
+        body = f"""Dear Medical Officer / Store In-charge,
+
+Greetings from **PMB Jan Aushadhi Kendra**, Pound Velupadam, Thrissur — Kerala's leading supplier of government-approved generic medicines.
+
+We supply 2,000+ PMBJP generic medicines at **50–90% lower prices** than branded alternatives, directly beneficial for patients at {name}{(', ' + district) if district else ''}.
+
+Key highlights:
+- All medicines approved under Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)
+- Direct supply to PHCs, CHCs, Taluk & District Hospitals
+- Competitive rates, reliable stock, timely delivery
+- Contact: +91 73569 85202
+
+We would appreciate the opportunity to connect and discuss how we can support your facility's medicine requirements.
+
+Warm regards,
+{from_name}
+Phone: +91 73569 85202
+Email: janaushadhipound8873@gmail.com
+"""
+        return subject, body
+
+    def send_email(to: str, name: str, district: str, ftype: str) -> bool:
+        try:
+            subject, body = build_email(name, district, ftype)
+            msg = MIMEMultipart("alternative")
+            msg["Subject"] = subject
+            msg["From"]    = f"{from_name} <{gmail_user}>"
+            msg["To"]      = to
+            html = body.replace("\n", "<br>").replace("**", "<b>").replace("</b><b>", "")
+            msg.attach(MIMEText(body, "plain"))
+            msg.attach(MIMEText(f"<html><body style='font-family:sans-serif'>{html}</body></html>", "html"))
+            with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=20) as s:
+                s.login(gmail_user, gmail_pass)
+                s.sendmail(gmail_user, to, msg.as_string())
+            return True
+        except Exception as e:
+            st.error(f"Failed to send to {to}: {e}")
+            return False
+
+    sent_set = load_sent()
+    email_leads = fdf[fdf["email"].str.strip().ne("")].copy()
+    unsent = email_leads[~email_leads["email"].isin(sent_set)]
+    already_sent = email_leads[email_leads["email"].isin(sent_set)]
+
+    col1, col2, col3 = st.columns(3)
+    col1.metric("Leads with email (filtered)", len(email_leads))
+    col2.metric("Not yet sent", len(unsent))
+    col3.metric("Already sent", len(already_sent))
+
+    if not gmail_pass:
+        st.warning("Enter Gmail App Password above to enable sending.")
+    elif len(unsent) == 0:
+        st.success("All email leads in current filter already sent!")
+    else:
+        st.markdown(f"**{len(unsent)} leads** ready to email in current filter.")
+
+        # Preview email
+        with st.expander("Preview email template", expanded=False):
+            if len(unsent):
+                r = unsent.iloc[0]
+                subj, body = build_email(r["name"], r["district"], r["type"])
+                st.markdown(f"**Subject:** {subj}")
+                st.text(body)
+
+        # Bulk send
+        max_send = st.slider("Max emails to send this run", 1, min(50, len(unsent)), min(10, len(unsent)))
+        if st.button(f"🚀 Send {max_send} emails now", type="primary", disabled=not gmail_pass):
+            to_send = unsent.head(max_send)
+            progress = st.progress(0)
+            ok = 0
+            for i, (_, r) in enumerate(to_send.iterrows()):
+                if send_email(r["email"], r["name"], r["district"], r["type"]):
+                    log_sent(r["email"], r["name"])
+                    ok += 1
+                progress.progress((i + 1) / len(to_send))
+            st.success(f"Sent {ok}/{len(to_send)} emails successfully!")
+            st.cache_data.clear()
+            st.rerun()
+
+        st.divider()
+        # Per-lead send
+        st.markdown("**Or send one at a time:**")
+        for _, r in unsent.head(20).iterrows():
+            with st.container(border=True):
+                c1, c2, c3 = st.columns([4, 2, 1])
+                c1.markdown(f"**{r['name']}**  \n*{r['type']} · {r['district']}*")
+                c2.markdown(f"📧 `{r['email']}`")
+                if c3.button("Send", key=f"send_{r['email']}"):
+                    if send_email(r["email"], r["name"], r["district"], r["type"]):
+                        log_sent(r["email"], r["name"])
+                        st.success(f"Sent to {r['email']}")
+                        st.rerun()
 
 st.markdown("---")
 st.caption(f"Data source: OpenStreetMap · Last updated: "
