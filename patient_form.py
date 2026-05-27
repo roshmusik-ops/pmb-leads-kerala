@@ -21,7 +21,7 @@ except ImportError:
     GSPREAD_OK = False
 
 LEADS_FILE = Path(__file__).with_name("local_patients.csv")
-FIELDS = ["name", "phone", "district", "area", "condition", "medicines", "registered_at"]
+FIELDS = ["name", "phone", "registered_at"]
 SHEET_NAME = "PMB Patient Leads"
 
 
@@ -86,49 +86,27 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.markdown("---")
-st.subheader("📋 Register for Free Medicine Price List")
-st.caption("Fill this form and we'll WhatsApp you the price list for your medicines — free of charge.")
+st.subheader("📋 Get Free Medicine Price List")
 
 with st.form("patient_form", clear_on_submit=True):
-    name     = st.text_input("Your name *")
-    phone    = st.text_input("WhatsApp number *", placeholder="10-digit mobile number")
-    district = st.selectbox("District", [
-        "Thrissur", "Ernakulam", "Palakkad", "Malappuram", "Kozhikode",
-        "Kannur", "Kasaragod", "Wayanad", "Idukki", "Kottayam",
-        "Alappuzha", "Pathanamthitta", "Kollam", "Thiruvananthapuram",
-    ])
-    area     = st.text_input("Town / Village", placeholder="e.g. Velupadam, Irinjalakuda")
-    condition = st.multiselect("Health condition (select all that apply)", [
-        "Diabetes", "Blood Pressure / Hypertension", "Thyroid",
-        "Heart / Cardiac", "Asthma / Breathing", "Arthritis / Joint pain",
-        "Kidney / Renal", "Cholesterol", "Cancer", "Skin condition",
-        "Neurological", "Eye / Vision", "General / Other",
-    ])
-    medicines = st.text_area("Medicines you buy regularly (optional)",
-                             placeholder="e.g. Metformin 500mg, Amlodipine 5mg, Atorvastatin 10mg")
-    agree = st.checkbox("I agree to be contacted on WhatsApp with medicine prices")
-    submitted = st.form_submit_button("✅ Register — Get Free Price List", type="primary")
+    name  = st.text_input("Your name *")
+    phone = st.text_input("WhatsApp number *", placeholder="10-digit mobile number")
+    submitted = st.form_submit_button("✅ Send me the price list", type="primary")
 
 if submitted:
     if not name.strip():
         st.error("Please enter your name.")
-    elif not phone.strip() or not phone.strip().lstrip("+").lstrip("91").isdigit() or len(phone.strip().lstrip("+").lstrip("91").lstrip("0")) < 10:
+    elif len("".join(c for c in phone if c.isdigit())[-10:]) < 10:
         st.error("Please enter a valid 10-digit mobile number.")
-    elif not agree:
-        st.error("Please agree to be contacted.")
     else:
         save_lead({
             "name": name.strip(),
             "phone": phone.strip(),
-            "district": district,
-            "area": area.strip(),
-            "condition": ", ".join(condition),
-            "medicines": medicines.strip(),
             "registered_at": datetime.now().strftime("%Y-%m-%d %H:%M"),
         })
         st.balloons()
-        st.success(f"✅ Thank you, {name.split()[0]}! We'll WhatsApp you the price list shortly.")
-        st.info("📞 You can also call us directly: **+91 73569 85202**")
+        st.success(f"✅ Thank you, {name.split()[0]}! We'll WhatsApp you shortly.")
+        st.info("📞 Call us: **+91 73569 85202**")
 
 st.markdown("---")
 st.markdown("""
