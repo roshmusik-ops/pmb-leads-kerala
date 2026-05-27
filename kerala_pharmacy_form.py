@@ -14,11 +14,12 @@ TELEGRAM_TOKEN = "8957824877:AAEVNvB6LPRbtobSEwp_jRsHv0EgVHPtvsQ"
 TELEGRAM_CHAT_ID = "1812502464"
 
 LEADS_FILE = Path(__file__).with_name("kerala_pharmacy_leads.csv")
-FIELDS = ["name", "phone", "registered_at"]
+FIELDS = ["name", "phone", "medicine_enquiry", "registered_at"]
 
-def telegram_notify(name: str, phone: str):
+def telegram_notify(name: str, phone: str, medicine: str = ""):
     try:
-        msg = f"💊 *New Lead — Kerala Pharmacy*\n👤 {name}\n📞 {phone}\n📍 Gandhi Nagar, Kodakara, Thrissur"
+        med_line = f"\n💊 Medicine: {medicine}" if medicine else ""
+        msg = f"💊 *New Lead — Kerala Pharmacy*\n👤 {name}\n📞 {phone}{med_line}\n📍 Gandhi Nagar, Kodakara, Thrissur"
         requests.get(
             f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage",
             params={"chat_id": TELEGRAM_CHAT_ID, "text": msg, "parse_mode": "Markdown"},
@@ -119,6 +120,9 @@ with st.form("lead_form", clear_on_submit=True):
     st.markdown("<p style='color:#f0c040;font-weight:600;margin-bottom:.25rem'>📱 WhatsApp Number</p>", unsafe_allow_html=True)
     phone = st.text_input("", placeholder="Enter your 10-digit mobile number", label_visibility="collapsed")
 
+    st.markdown("<p style='color:#f0c040;font-weight:600;margin-bottom:.25rem'>💊 Medicine Enquiry (optional)</p>", unsafe_allow_html=True)
+    medicine = st.text_input("", placeholder="e.g. Metformin 500mg, Amlodipine 5mg", label_visibility="collapsed", key="med")
+
     submitted = st.form_submit_button("💊 Get My Offers & Price List")
 
 if submitted:
@@ -130,9 +134,10 @@ if submitted:
         save_lead({
             "name": name.strip(),
             "phone": phone.strip(),
+            "medicine_enquiry": medicine.strip(),
             "registered_at": datetime.now().strftime("%Y-%m-%d %H:%M"),
         })
-        telegram_notify(name.strip(), phone.strip())
+        telegram_notify(name.strip(), phone.strip(), medicine.strip())
         st.balloons()
         st.success(f"✅ Thank you, {name.split()[0]}! We'll WhatsApp you the price list shortly.")
         st.info("📞 Call us: **+91 80867 32560**")
