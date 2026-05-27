@@ -144,6 +144,7 @@ st.markdown("""
   Kerala Pharmacy, Gandhi Nagar, Kodakara, Thrissur<br>
   <a href='tel:+918086732560' style='color:#f0c040'>+91 80867 32560</a>
   &nbsp;·&nbsp;
+  <a href='mailto:keralapharmacy3@gmail.com' style='color:#f0c040'>keralapharmacy3@gmail.com</a><br>
   <span style='color:rgba(255,255,255,.4)'>✨ Caring You Beyond Prescriptions</span>
 </div>
 """, unsafe_allow_html=True)
