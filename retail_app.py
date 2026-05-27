@@ -1,6 +1,6 @@
 """
 Kerala Retail Leads — Private Doctors, Clinics & Pharmacies
-PMB Jan Aushadhi Kendra, Velupadam, Thrissur
+PMB Jan Aushadhi Chelakottukara
 
 Run:
     streamlit run retail_app.py
@@ -52,7 +52,7 @@ def whatsapp_url(phone: str, name: str) -> str:
     p = "".join(c for c in phone if c.isdigit())
     if not p: return ""
     if len(p) == 10: p = "91" + p
-    msg = (f"Namaste Doctor/Sir, I'm from PMB Jan Aushadhi Kendra, Pound Velupadam Thrissur. "
+    msg = (f"Namaste Doctor/Sir, I'm from PMB Jan Aushadhi Chelakottukara. "
            f"We supply 2,000+ PMBJP generic medicines at 50-90% less than branded prices. "
            f"Could we discuss how we can support {name} with affordable generic medicines for your patients?")
     return f"https://wa.me/{p}?text={quote(msg)}"
@@ -79,7 +79,7 @@ def type_color(t: str) -> str:
 # ---------- header ----------
 st.title("🏪 Kerala Retail Leads")
 st.caption("Private doctors, clinics & pharmacies · "
-           "**PMB Jan Aushadhi Kendra, Velupadam, Thrissur**")
+           "**PMB Jan Aushadhi Chelakottukara**")
 
 if not CSV_PATH.exists():
     st.warning("No retail leads CSV found.")
@@ -238,10 +238,10 @@ with tab_email:
             w.writerow([email, name, datetime.now().strftime("%Y-%m-%d %H:%M")])
 
     def build_email(name, district, ftype):
-        subject = "Generic Medicines Supply — PMB Jan Aushadhi Kendra, Thrissur"
+        subject = "Generic Medicines Supply — PMB Jan Aushadhi Chelakottukara"
         body = f"""Dear Doctor / Proprietor,
 
-Greetings from PMB Jan Aushadhi Kendra, Pound Velupadam, Thrissur.
+Greetings from PMB Jan Aushadhi Chelakottukara.
 
 We are Kerala's leading supplier of PMBJP government-approved generic medicines, supplying 2,000+ medicines at 50-90% less than branded prices.
 

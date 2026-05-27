@@ -65,7 +65,7 @@ def whatsapp_url(phone: str, name: str) -> str:
     if len(p) == 10:
         p = "91" + p
     msg = (
-        f"Namaste, this is from PMB Jan Aushadhi Kendra, Pound Velupadam Thrissur "
+        f"Namaste, this is from PMB Jan Aushadhi Kendra, Chelakottukara, Thrissur "
         f"(No.1 Govt Health Centre dealer in Kerala). We supply 2,000+ generic medicines "
         f"at 50–90% lower than branded. Could we connect with the medical officer at "
         f"{name}?"
@@ -81,7 +81,7 @@ def maps_url(lat, lon, name) -> str:
 
 # ---------- header ----------
 st.title("🏥 Kerala Govt Health Centres")
-st.caption("Built for **PMB Jan Aushadhi Kendra, Pound Velupadam, Thrissur** · "
+st.caption("Built for **PMB Jan Aushadhi Chelakottukara** · "
            "No.1 Govt Health Centre Dealer in Kerala")
 
 if not CSV_PATH.exists():
@@ -278,7 +278,7 @@ with tab_email:
         gmail_user = st.text_input("Gmail address", value="pmbjanaushadhi680006@gmail.com")
         gmail_pass = st.text_input("Gmail App Password", type="password",
                                    help="Generate at myaccount.google.com/apppasswords")
-        from_name  = st.text_input("Sender name", value="PMB Jan Aushadhi Kendra, Velupadam")
+        from_name  = st.text_input("Sender name", value="PMB Jan Aushadhi Chelakottukara")
 
     # Load sent log
     def load_sent() -> set:

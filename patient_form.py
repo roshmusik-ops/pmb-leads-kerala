@@ -77,8 +77,8 @@ h1 { color: #16a34a; }
 st.markdown("""
 <div style='text-align:center;padding:1rem 0'>
   <div style='font-size:3rem'>💊</div>
-  <h1 style='margin:0.3rem 0'>PMB Jan Aushadhi Kendra</h1>
-  <p style='color:#64748b;margin:0'>Pound Velupadam, Thrissur &nbsp;·&nbsp; +91 73569 85202</p>
+  <h1 style='margin:0.3rem 0'>PMB Jan Aushadhi Chelakottukara</h1>
+  <p style='color:#64748b;margin:0'>Chelakottukara, Thrissur &nbsp;·&nbsp; +91 73569 85202</p>
   <div style='background:#f0fdf4;border:1px solid #86efac;border-radius:12px;padding:0.7rem;margin-top:1rem'>
     <b style='color:#15803d'>Save 50–90%</b> on your medicines with government-approved generics
   </div>
@@ -111,7 +111,7 @@ if submitted:
 st.markdown("---")
 st.markdown("""
 <div style='text-align:center;font-size:0.85rem;color:#64748b'>
-  PMB Jan Aushadhi Kendra, Pound Velupadam, Thrissur<br>
+  PMB Jan Aushadhi Chelakottukara, Chelakottukara, Thrissur<br>
   <a href='tel:+917356985202'>+91 73569 85202</a> &nbsp;·&nbsp;
   <a href='mailto:pmbjanaushadhi680006@gmail.com'>pmbjanaushadhi680006@gmail.com</a>
 </div>
