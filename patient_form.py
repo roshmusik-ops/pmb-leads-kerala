@@ -1,0 +1,101 @@
+"""
+PMB Jan Aushadhi — Patient Lead Capture Form
+=============================================
+A simple Streamlit form for patients to register for medicine price updates.
+Share the URL or QR code at your counter / WhatsApp groups.
+
+Run:
+    streamlit run patient_form.py --server.port 8522
+"""
+from __future__ import annotations
+import csv, qrcode, io
+from datetime import datetime
+from pathlib import Path
+import streamlit as st
+
+LEADS_FILE = Path(__file__).with_name("local_patients.csv")
+FIELDS = ["name", "phone", "district", "area", "condition", "medicines", "registered_at"]
+
+st.set_page_config(
+    page_title="PMB Jan Aushadhi — Free Price List",
+    page_icon="💊",
+    layout="centered",
+)
+
+st.markdown("""
+<style>
+.block-container { max-width: 520px; padding-top: 2rem; }
+h1 { color: #16a34a; }
+</style>
+""", unsafe_allow_html=True)
+
+# ── Logo / header ──
+st.markdown("""
+<div style='text-align:center;padding:1rem 0'>
+  <div style='font-size:3rem'>💊</div>
+  <h1 style='margin:0.3rem 0'>PMB Jan Aushadhi Kendra</h1>
+  <p style='color:#64748b;margin:0'>Pound Velupadam, Thrissur &nbsp;·&nbsp; +91 73569 85202</p>
+  <div style='background:#f0fdf4;border:1px solid #86efac;border-radius:12px;padding:0.7rem;margin-top:1rem'>
+    <b style='color:#15803d'>Save 50–90%</b> on your medicines with government-approved generics
+  </div>
+</div>
+""", unsafe_allow_html=True)
+
+st.markdown("---")
+st.subheader("📋 Register for Free Medicine Price List")
+st.caption("Fill this form and we'll WhatsApp you the price list for your medicines — free of charge.")
+
+with st.form("patient_form", clear_on_submit=True):
+    name     = st.text_input("Your name *")
+    phone    = st.text_input("WhatsApp number *", placeholder="10-digit mobile number")
+    district = st.selectbox("District", [
+        "Thrissur", "Ernakulam", "Palakkad", "Malappuram", "Kozhikode",
+        "Kannur", "Kasaragod", "Wayanad", "Idukki", "Kottayam",
+        "Alappuzha", "Pathanamthitta", "Kollam", "Thiruvananthapuram",
+    ])
+    area     = st.text_input("Town / Village", placeholder="e.g. Velupadam, Irinjalakuda")
+    condition = st.multiselect("Health condition (select all that apply)", [
+        "Diabetes", "Blood Pressure / Hypertension", "Thyroid",
+        "Heart / Cardiac", "Asthma / Breathing", "Arthritis / Joint pain",
+        "Kidney / Renal", "Cholesterol", "Cancer", "Skin condition",
+        "Neurological", "Eye / Vision", "General / Other",
+    ])
+    medicines = st.text_area("Medicines you buy regularly (optional)",
+                             placeholder="e.g. Metformin 500mg, Amlodipine 5mg, Atorvastatin 10mg")
+    agree = st.checkbox("I agree to be contacted on WhatsApp with medicine prices")
+    submitted = st.form_submit_button("✅ Register — Get Free Price List", type="primary")
+
+if submitted:
+    if not name.strip():
+        st.error("Please enter your name.")
+    elif not phone.strip() or not phone.strip().lstrip("+").lstrip("91").isdigit() or len(phone.strip().lstrip("+").lstrip("91").lstrip("0")) < 10:
+        st.error("Please enter a valid 10-digit mobile number.")
+    elif not agree:
+        st.error("Please agree to be contacted.")
+    else:
+        exists = LEADS_FILE.exists()
+        with open(LEADS_FILE, "a", encoding="utf-8", newline="") as f:
+            w = csv.DictWriter(f, fieldnames=FIELDS)
+            if not exists:
+                w.writeheader()
+            w.writerow({
+                "name": name.strip(),
+                "phone": phone.strip(),
+                "district": district,
+                "area": area.strip(),
+                "condition": ", ".join(condition),
+                "medicines": medicines.strip(),
+                "registered_at": datetime.now().strftime("%Y-%m-%d %H:%M"),
+            })
+        st.balloons()
+        st.success(f"✅ Thank you, {name.split()[0]}! We'll WhatsApp you the price list shortly.")
+        st.info("📞 You can also call us directly: **+91 73569 85202**")
+
+st.markdown("---")
+st.markdown("""
+<div style='text-align:center;font-size:0.85rem;color:#64748b'>
+  PMB Jan Aushadhi Kendra, Pound Velupadam, Thrissur<br>
+  <a href='tel:+917356985202'>+91 73569 85202</a> &nbsp;·&nbsp;
+  <a href='mailto:janaushadhipound8873@gmail.com'>janaushadhipound8873@gmail.com</a>
+</div>
+""", unsafe_allow_html=True)
