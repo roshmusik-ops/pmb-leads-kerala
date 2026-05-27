@@ -8,13 +8,57 @@ Run:
     streamlit run patient_form.py --server.port 8522
 """
 from __future__ import annotations
-import csv, qrcode, io
+import csv, io, json
 from datetime import datetime
 from pathlib import Path
 import streamlit as st
 
+try:
+    import gspread
+    from google.oauth2.service_account import Credentials
+    GSPREAD_OK = True
+except ImportError:
+    GSPREAD_OK = False
+
 LEADS_FILE = Path(__file__).with_name("local_patients.csv")
 FIELDS = ["name", "phone", "district", "area", "condition", "medicines", "registered_at"]
+SHEET_NAME = "PMB Patient Leads"
+
+
+def get_sheet():
+    if not GSPREAD_OK:
+        return None
+    try:
+        creds_dict = dict(st.secrets["gcp_service_account"])
+        creds = Credentials.from_service_account_info(
+            creds_dict,
+            scopes=["https://spreadsheets.google.com/feeds",
+                    "https://www.googleapis.com/auth/drive"]
+        )
+        gc = gspread.authorize(creds)
+        try:
+            sh = gc.open(SHEET_NAME)
+        except gspread.exceptions.SpreadsheetNotFound:
+            sh = gc.create(SHEET_NAME)
+            sh.share(None, perm_type="anyone", role="reader")
+        ws = sh.sheet1
+        if ws.row_count < 2 or ws.cell(1,1).value != "name":
+            ws.insert_row(FIELDS, 1)
+        return ws
+    except Exception:
+        return None
+
+
+def save_lead(row: dict):
+    ws = get_sheet()
+    if ws:
+        ws.append_row([row.get(f, "") for f in FIELDS])
+    exists = LEADS_FILE.exists()
+    with open(LEADS_FILE, "a", encoding="utf-8", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=FIELDS)
+        if not exists:
+            w.writeheader()
+        w.writerow(row)
 
 st.set_page_config(
     page_title="PMB Jan Aushadhi — Free Price List",
@@ -73,20 +117,15 @@ if submitted:
     elif not agree:
         st.error("Please agree to be contacted.")
     else:
-        exists = LEADS_FILE.exists()
-        with open(LEADS_FILE, "a", encoding="utf-8", newline="") as f:
-            w = csv.DictWriter(f, fieldnames=FIELDS)
-            if not exists:
-                w.writeheader()
-            w.writerow({
-                "name": name.strip(),
-                "phone": phone.strip(),
-                "district": district,
-                "area": area.strip(),
-                "condition": ", ".join(condition),
-                "medicines": medicines.strip(),
-                "registered_at": datetime.now().strftime("%Y-%m-%d %H:%M"),
-            })
+        save_lead({
+            "name": name.strip(),
+            "phone": phone.strip(),
+            "district": district,
+            "area": area.strip(),
+            "condition": ", ".join(condition),
+            "medicines": medicines.strip(),
+            "registered_at": datetime.now().strftime("%Y-%m-%d %H:%M"),
+        })
         st.balloons()
         st.success(f"✅ Thank you, {name.split()[0]}! We'll WhatsApp you the price list shortly.")
         st.info("📞 You can also call us directly: **+91 73569 85202**")
