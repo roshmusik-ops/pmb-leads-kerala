@@ -223,7 +223,7 @@ with tab_email:
         st.info("Add Gmail credentials to Streamlit secrets.")
         gmail_user = st.text_input("Gmail", value="pmbjanaushadhi680006@gmail.com")
         gmail_pass = st.text_input("App Password", type="password")
-        from_name  = st.text_input("Sender name", value="PMB Jan Aushadhi Kendra, Velupadam")
+        from_name  = st.text_input("Sender name", value="PMB Jan Aushadhi Kendra, Chelakottukara")
 
     def load_sent():
         if not SENT_LOG.exists(): return set()
