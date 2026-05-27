@@ -8,10 +8,24 @@ Run:
     streamlit run patient_form.py --server.port 8522
 """
 from __future__ import annotations
-import csv, io, json
+import csv, io, json, requests
 from datetime import datetime
 from pathlib import Path
 import streamlit as st
+
+TELEGRAM_TOKEN = "8957824877:AAEVNvB6LPRbtobSEwp_jRsHv0EgVHPtvsQ"
+TELEGRAM_CHAT_ID = "1812502464"
+
+def telegram_notify(name: str, phone: str):
+    try:
+        msg = f"💊 *New Patient Lead*\n👤 {name}\n📞 {phone}\n🏪 PMB Jan Aushadhi Chelakottukara"
+        requests.get(
+            f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage",
+            params={"chat_id": TELEGRAM_CHAT_ID, "text": msg, "parse_mode": "Markdown"},
+            timeout=5,
+        )
+    except Exception:
+        pass
 
 try:
     import gspread
@@ -104,6 +118,7 @@ if submitted:
             "phone": phone.strip(),
             "registered_at": datetime.now().strftime("%Y-%m-%d %H:%M"),
         })
+        telegram_notify(name.strip(), phone.strip())
         st.balloons()
         st.success(f"✅ Thank you, {name.split()[0]}! We'll WhatsApp you shortly.")
         st.info("📞 Call us: **+91 94473 36560**")
