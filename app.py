@@ -281,11 +281,13 @@ with tab_email:
         from_name  = st.text_input("Sender name", value="PMB Jan Aushadhi Chelakottukara")
 
     # Load sent log
+    today = datetime.now().strftime("%Y-%m-%d")
+
     def load_sent() -> set:
         if not SENT_LOG.exists():
             return set()
         try:
-            return {r["email"] for r in csv.DictReader(open(SENT_LOG, encoding="utf-8"))}
+            return {r["email"] for r in csv.DictReader(open(SENT_LOG, encoding="utf-8")) if r.get("sent_at", "").startswith(today)}
         except Exception:
             return set()
 
@@ -343,15 +345,28 @@ Email: pmbjanaushadhi680006@gmail.com
     unsent = email_leads[~email_leads["email"].isin(sent_set)]
     already_sent = email_leads[email_leads["email"].isin(sent_set)]
 
-    col1, col2, col3 = st.columns(3)
+    col1, col2, col3, col4 = st.columns(4)
     col1.metric("Leads with email (filtered)", len(email_leads))
-    col2.metric("Not yet sent", len(unsent))
-    col3.metric("Already sent", len(already_sent))
+    col2.metric("Not yet sent today", len(unsent))
+    col3.metric("Sent today", len(already_sent))
+    with col4:
+        st.markdown("&nbsp;", unsafe_allow_html=True)
+        if st.button("🔄 Reset Today's Log", help="Clears today's sent log so all leads can be resent"):
+            if SENT_LOG.exists():
+                rows_all = list(csv.DictReader(open(SENT_LOG, encoding="utf-8")))
+                rows_keep = [r for r in rows_all if not r.get("sent_at", "").startswith(today)]
+                with open(SENT_LOG, "w", encoding="utf-8", newline="") as f:
+                    w = csv.writer(f)
+                    w.writerow(["email", "name", "sent_at"])
+                    for r in rows_keep:
+                        w.writerow([r["email"], r["name"], r["sent_at"]])
+            st.success("Reset! All leads ready to send again.")
+            st.rerun()
 
     if not gmail_pass:
         st.warning("Enter Gmail App Password above to enable sending.")
     elif len(unsent) == 0:
-        st.success("All email leads in current filter already sent!")
+        st.success(f"All email leads sent today ({today}). Reset log to resend.")
     else:
         st.markdown(f"**{len(unsent)} leads** ready to email in current filter.")
 
